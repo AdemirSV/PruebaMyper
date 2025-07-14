@@ -1,0 +1,95 @@
+﻿@model IEnumerable<PruebaMyper.Models.Trabajador>
+
+@{
+    ViewData["Title"] = "Listado de Trabajadores";
+    var sexoSeleccionado = Context.Request.Query["sexo"].ToString();
+}
+
+<h1>Listado de Trabajadores</h1>
+
+<div class="mb-3">
+    <a asp-action="Crear" class="btn btn-success">+ Nuevo Trabajador</a>
+</div>
+
+<form method="get" asp-action="Index" class="mb-3">
+    <label>Filtrar por Sexo:</label>
+    <select name="sexo" onchange="this.form.submit()" class="form-control w-25 d-inline-block">
+        <option value="">-- Todos --</option>
+        <option value="M" selected="@(sexoSeleccionado == "M" ? "selected" : null)">Masculino</option>
+        <option value="F" selected="@(sexoSeleccionado == "F" ? "selected" : null)">Femenino</option>
+    </select>
+</form>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Tipo Doc</th>
+            <th>N° Documento</th>
+            <th>Nombres</th>
+            <th>Sexo</th>
+            <th>Departamento</th>
+            <th>Provincia</th>
+            <th>Distrito</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var t in Model)
+        {
+            var color = t.Sexo == "M" ? "table-primary" : "table-warning";
+            <tr class="@color">
+                <td>
+                    @{
+                        string tipo = t.TipoDocumento switch
+                        {
+                            "DNI" => "DNI",
+                            "RUC" => "RUC",
+                            "PAS" => "Pasaporte",
+                            "CEX" => "Carnet de extranjería",
+                            _ => t.TipoDocumento
+                        };
+                    }
+                    @tipo
+                </td>
+                <td>@t.NumeroDocumento</td>
+                <td>@t.Nombres</td>
+                <td>@t.Sexo</td>
+                <td>@t.NombreDepartamento</td>
+                <td>@t.NombreProvincia</td>
+                <td>@t.NombreDistrito</td>
+                <td>
+                    <a asp-action="Editar" asp-route-id="@t.Id" class="btn btn-sm btn-primary">Editar</a>
+                    <form asp-action="Eliminar" asp-route-id="@t.Id" method="post" class="d-inline eliminar-form">
+                        <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.querySelectorAll('.eliminar-form').forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: "¡Esta acción eliminará al trabajador!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    </script>
+}
